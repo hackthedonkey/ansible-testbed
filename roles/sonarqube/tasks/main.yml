@@ -1,0 +1,20 @@
+---
+- name: OS Setup
+  ansible.builtin.include_tasks: os_setup.yml
+  when:
+  - inventory_hostname in groups['sonarqube']
+
+- name: Install Postgresql
+  ansible.builtin.include_tasks: postgresql.yml
+  when:
+  - inventory_hostname in groups['sonarqube']
+
+- name: Install Sonarqube
+  ansible.builtin.include_tasks: sonar.yml
+  when:
+  - inventory_hostname in groups['sonarqube']
+
+- name: config haproxy
+  ansible.builtin.include_tasks: ha_config.yml
+  when:
+  - inventory_hostname in groups['haproxy']

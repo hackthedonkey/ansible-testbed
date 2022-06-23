@@ -1,0 +1,62 @@
+- name: dpkg unlock
+  file:
+    path: "{{ item }}"
+    state: absent
+  with_items:
+  - /var/lib/dpkg/lock
+  - /var/lib/dpkg/lock-frontend
+  ignore_errors: yes
+
+
+- name: Add gitlab ppa repository
+  ansible.builtin.shell: |
+    curl -sS https://packages.gitlab.com/install/repositories/gitlab/gitlab-ce/script.deb.sh | bash
+
+- name: Add git apt key by id from a keyserver
+  apt_key:
+    keyserver: keyserver.ubuntu.com
+    id: A1715D88E1DF1F24
+    state: present
+  become: yes
+
+- name: Install Dependency
+  package:
+    name: "{{ item }}"
+    state: present
+  with_items:
+    - ca-certificates
+    - tzdata
+    - perl
+
+- name: Install Gitlab-CE
+  package:
+    name: gitlab-ce
+    state: present
+
+- name: Create Harbor Cert Directory
+  ansible.builtin.file:
+    path: "{{ gitlab_ssl_path }}"
+    state: directory
+    mode: '0755'
+    recurse: yes
+    owner: root
+    group: root
+
+- name: Copy ssl cert
+  ansible.builtin.copy:
+    src: "{{ item }}"
+    dest: "{{ gitlab_ssl_path }}"
+  with_items:
+  - files/certs/fullchain1.pem
+  - files/certs/privkey1.pem
+
+- name: config gitlab.rb
+  ansible.builtin.template:
+    src: "{{ gitlab_config }}"
+    dest: /etc/gitlab/gitlab.rb
+    owner: root
+    group: root
+    mode: 0644
+
+- name: gitlab-ctl reconfigure
+  command: gitlab-ctl reconfigure

@@ -1,0 +1,70 @@
+- name: dpkg unlock
+  file:
+    path: "{{ item }}"
+    state: absent
+  with_items:
+  - /var/lib/dpkg/lock
+  - /var/lib/dpkg/lock-frontend
+  ignore_errors: yes
+
+- name: Install Docker
+  ansible.builtin.package:
+    name: "docker.io"
+    state: present
+  retries: 10
+  delay: 3
+  register: result
+  until: result is not failed
+
+- name: Install latest Docker-Compose
+  ansible.builtin.shell: |
+    curl -L "https://github.com/docker/compose/releases/download/{{ docker_compose_version }}/docker-compose-$(uname -s)-$(uname -m)" -o /usr/local/bin/docker-compose
+    chmod 755 /usr/local/bin/docker-compose
+
+- name: Get harbor binary
+  get_url:
+    url: https://github.com/goharbor/harbor/releases/download/{{ harbor_version }}/harbor-online-installer-{{ harbor_version }}.tgz
+    dest: /tmp/
+    mode: '0644'
+
+- name: Extract harbor.tgz
+  ansible.builtin.unarchive:
+    src: /tmp/harbor-online-installer-{{ harbor_version }}.tgz
+    dest: /opt/
+    remote_src: yes
+  retries: 10
+  delay: 3
+  register: result
+  until: result is not failed
+
+- name: Create Harbor Cert Directory
+  ansible.builtin.file:
+    path: "{{ harbor_ssl_path }}"
+    state: directory
+    mode: '0755'
+    recurse: yes
+    owner: root
+    group: root
+
+- name: Copy ssl cert
+  ansible.builtin.copy:
+    src: "{{ item }}"
+    dest: "{{ harbor_ssl_path }}"
+  with_items:
+  - files/certs/fullchain1.pem
+  - files/certs/privkey1.pem
+
+- name: config harbor.yml
+  ansible.builtin.template:
+    src: "{{ harbor_config }}"
+    dest: /opt/harbor/harbor.yml
+    owner: root
+    group: root
+    mode: 0644
+
+- name: Execute Install Script
+  ansible.builtin.command: /opt/harbor/./install.sh
+  retries: 10
+  delay: 3
+  register: result
+  until: result is not failed

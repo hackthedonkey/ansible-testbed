@@ -1,0 +1,9 @@
+---
+rke2_servers_group_name: masters
+rke2_cluster_group_name: k8s_cluster
+cert_manager_version: v1.8.0
+rancher_domain: rancher.lazydonkey.co.kr
+rancher_replica: 1
+rancher_version: 2.6.5
+rancher_config: templates/config.yaml.j2
+kubectl: /var/lib/rancher/rke2/bin/kubectl --kubeconfig /etc/rancher/rke2/rke2.yaml

@@ -1,0 +1,24 @@
+- name: acl config
+  lineinfile:
+    path: /etc/haproxy/haproxy.cfg
+    line: acl nexus hdr_end(host) -i {{ nexus_domain }}
+    insertbefore: '^acl'
+
+- name: backend matching
+  lineinfile:
+    path: /etc/haproxy/haproxy.cfg
+    line: use_backend nexus if nexus
+    insertbefore: '^use_backend'
+
+- name: backend config
+  blockinfile:
+    marker: "# {mark} Nexus Backend"
+    block: "{{ lookup('template', 'config.yaml.j2') }}"
+    dest: "/etc/haproxy/haproxy.cfg"
+    insertafter: EOF
+
+- name: Restart Haproxy service
+  ansible.builtin.systemd:
+    name: "haproxy.service"
+    state: restarted
+    enabled: true

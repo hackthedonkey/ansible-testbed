@@ -1,0 +1,7 @@
+backend nexus
+  mode http
+  balance roundrobin
+  cookie SERVERID insert indirect nocache
+{% for h in groups['nexus'] %}
+  server {{ hostvars[h].ansible_hostname }} {{ hostvars[h].ansible_host }}:{{ nexus_port }} check port {{ nexus_port }}
+{% endfor %}

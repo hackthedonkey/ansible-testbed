@@ -1,0 +1,6 @@
+---
+harbor_version: v2.5.1
+harbor_ssl_path: /etc/harbor/ssl/
+harbor_domain: harbor.lazydonkey.co.kr
+harbor_config: templates/harbor.yaml
+docker_compose_version: v2.6.0

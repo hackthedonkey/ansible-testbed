@@ -1,0 +1,90 @@
+- name: dpkg unlock
+  file:
+    path: "{{ item }}"
+    state: absent
+  with_items:
+  - /var/lib/dpkg/lock-frontend
+  - /var/lib/dpkg/lock
+  ignore_errors: yes
+
+- name: Install jdk-8
+  package:
+    name: openjdk-8-jdk
+    state: present
+  retries: 10
+  delay: 3
+  register: result
+  until: result is not failed
+
+- name: Get nexus binary
+  get_url:
+    url: https://download.sonatype.com/nexus/3/latest-unix.tar.gz
+    dest: /tmp/nexus.tar.gz
+    mode: '0644'
+
+- name: Add Nexus User
+  user:
+    name: nexus
+
+- name: Extract nexus tarball
+  ansible.builtin.unarchive:
+    src: /tmp/nexus.tar.gz
+    dest: /opt/
+    remote_src: yes
+  retries: 10
+  delay: 3
+  register: result
+  until: result is not failed
+
+- name: get nexus directory name
+  shell: |
+    ls /opt | grep nexus
+  register: nexus_dir_name
+
+- name: Rename Nexus Directory
+  command: mv /opt/{{ nexus_dir_name.stdout }} /opt/nexus
+
+- name: chown nexus binary
+  command: "{{ item }}"
+  with_items:
+  - chown -R nexus:nexus /opt/nexus
+  - chown -R nexus:nexus /opt/sonatype-work
+
+- name: config nexus.rc file
+  lineinfile:
+    path: /opt/nexus/bin/nexus.rc
+    line: 'run_as_user="nexus"'
+    regexp: '^run_as_user'
+
+- name: config nexus.rc file
+  lineinfile:
+    path: /opt/nexus/etc/nexus-default.properties
+    line: 'application-port={{ nexus_port }}'
+    regexp: '^application-port'
+
+- name: create nexus service file
+  blockinfile:
+    path: /etc/systemd/system/nexus.service
+    create: yes
+    marker: ""
+    block: |
+      [Unit]
+      Description=nexus service
+      After=network.target
+      [Service]
+      Type=forking
+      LimitNOFILE=65536
+      User=nexus
+      Group=nexus
+      ExecStart=/opt/nexus/bin/nexus start
+      ExecStop=/opt/nexus/bin/nexus stop
+      User=nexus
+      Restart=on-abort
+      [Install]
+      WantedBy=multi-user.target
+
+- name: Start Nexus service
+  ansible.builtin.systemd:
+    name: "nexus.service"
+    state: started
+    enabled: true

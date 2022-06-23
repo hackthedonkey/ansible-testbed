@@ -1,0 +1,7 @@
+backend gitlab
+  mode http
+  balance roundrobin
+  cookie SERVERID insert indirect nocache
+{% for h in groups['gitlab'] %}
+  server {{ hostvars[h].ansible_hostname }} {{ hostvars[h].ansible_host }}:{{ gitlab_port }} check port {{ gitlab_port }}
+{% endfor %}

@@ -1,0 +1,54 @@
+- name: dpkg unlock
+  file:
+    path: "{{ item }}"
+    state: absent
+  with_items:
+  - /var/lib/dpkg/lock-frontend
+  - /var/lib/dpkg/lock
+  ignore_errors: yes
+
+- name: Install Haproxy
+  ansible.builtin.package:
+    name: haproxy
+    state: present
+  retries: 10
+  delay: 3
+  register: result
+  until: result is not failed
+
+- name: Start Haproxy service
+  ansible.builtin.systemd:
+    name: "haproxy.service"
+    state: started
+    enabled: true
+
+- name: create certs directory
+  file:
+    path: /etc/haproxy/certs
+    state: directory
+    owner: root
+    group: root
+
+- name: ssl.pem generate
+  ansible.builtin.template:
+    src: "{{ rancher_ssl }}"
+    dest: /etc/haproxy/certs/ssl.pem
+    owner: root
+    group: root
+    mode: 0644
+
+
+- name: haproxy ssl config
+  blockinfile:
+    path: /etc/haproxy/haproxy.cfg
+    marker: "#{mark} HAPROXY SSL CONFIG "
+    block: |
+      frontend http_frontend
+          mode http
+          bind 0.0.0.0:80
+          http-request redirect scheme https unless { ssl_fc }
+      frontend https_frontend
+          mode http
+          bind *:443  ssl crt /etc/haproxy/certs/ssl.pem
+          reqadd          X-Forwarded-Proto:\ https
+          reqadd          X-Forwarded-For:\ https

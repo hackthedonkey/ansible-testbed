@@ -1,0 +1,4 @@
+---
+- name: Install Haproxy
+  ansible.builtin.include_tasks: haproxy.yml
+  when: inventory_hostname in groups['haproxy']

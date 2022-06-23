@@ -1,0 +1,8 @@
+- name: Install Rancher Server
+  command: "{{ item }}"
+  with_items:
+  - /var/lib/rancher/rke2/bin/kubectl --kubeconfig /etc/rancher/rke2/rke2.yaml create namespace cattle-system
+  - helm repo add rancher-stable https://releases.rancher.com/server-charts/stable
+  - helm repo update
+  - helm search repo rancher-stable
+  - helm install rancher rancher-stable/rancher --namespace cattle-system --set hostname={{ rancher_domain }} --version={{ rancher_version }} --set replicas={{ rancher_replica }}

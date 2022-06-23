@@ -1,0 +1,4 @@
+---
+sonarqube_version: 9.5.0
+sonarqube_domain: sonarqube.lazydonkey.co.kr
+sonarqube_port: 9000

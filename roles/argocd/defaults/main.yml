@@ -1,0 +1,8 @@
+---
+rke2_servers_group_name: masters
+rke2_cluster_group_name: k8s_cluster
+kubectl: /var/lib/rancher/rke2/bin/kubectl --kubeconfig /etc/rancher/rke2/rke2.yaml
+rke2_data_path: /var/lib/rancher/rke2
+argocd_domain: argocd.lazydonkey.co.kr
+argocd_tls_secret_name: tls-argocd-secret
+argocd_ingress_config: templates/ingress.yaml.j2

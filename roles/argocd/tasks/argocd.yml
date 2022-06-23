@@ -1,0 +1,26 @@
+- name: Install argocd
+  ansible.builtin.shell: |
+   {{ kubectl }} create ns argocd
+   {{ kubectl }} apply -n argocd -f https://raw.githubusercontent.com/argoproj/argo-cd/stable/manifests/install.yaml
+
+- name: Copy Cert file
+  ansible.builtin.copy:
+    src: files/certs/
+    dest: /tmp/certs/
+    directory_mode: yes
+
+- name: Create Secret
+  ansible.builtin.shell: |
+   {{ kubectl }} create secret tls {{ argocd_tls_secret_name }} --cert /tmp/certs/cert1.pem --key /tmp/certs/privkey1.pem -n argocd
+
+- name: Copy argocd ingress
+  ansible.builtin.template:
+    src: "{{ argocd_ingress_config }}"
+    dest: /tmp/ingress.yaml
+    owner: root
+    group: root
+    mode: 0666
+
+- name: Create Ingress
+  ansible.builtin.shell: |
+    {{ kubectl }} apply -f /tmp/ingress.yaml -n argocd

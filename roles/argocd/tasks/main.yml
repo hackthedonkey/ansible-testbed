@@ -1,0 +1,11 @@
+---
+# tasks file for role-rancher
+- name: Install Argocd
+  ansible.builtin.include_tasks: argocd.yml
+  when:
+  - inventory_hostname == groups[rke2_servers_group_name].0
+
+- name: config haproxy
+  ansible.builtin.include_tasks: ha_config.yml
+  when:
+  - inventory_hostname in groups['haproxy']

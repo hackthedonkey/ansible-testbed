@@ -1,0 +1,11 @@
+---
+- name: Install Harbor
+  ansible.builtin.include_tasks: harbor.yml
+  when:
+  - inventory_hostname in groups['harbor']
+  - inventory_hostname not in groups['haproxy']
+
+- name: config haproxy
+  ansible.builtin.include_tasks: ha_config.yml
+  when:
+  - inventory_hostname in groups['haproxy']

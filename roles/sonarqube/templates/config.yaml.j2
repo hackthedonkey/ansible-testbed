@@ -1,0 +1,7 @@
+backend sonarqube
+  mode http
+  balance roundrobin
+  cookie SERVERID insert indirect nocache
+{% for h in groups['sonarqube'] %}
+  server {{ hostvars[h].ansible_hostname }} {{ hostvars[h].ansible_host }}:{{ sonarqube_port }} check port {{ sonarqube_port }}
+{% endfor %}

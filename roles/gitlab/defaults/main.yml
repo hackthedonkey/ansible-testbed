@@ -1,0 +1,5 @@
+---
+gitlab_domain: gitlab.lazydonkey.co.kr
+gitlab_config: templates/gitlab.rb
+gitlab_ssl_path: /etc/gitlab/ssl/
+gitlab_port: 9443

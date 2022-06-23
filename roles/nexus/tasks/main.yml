@@ -1,0 +1,10 @@
+---
+- name: Install Nexus
+  ansible.builtin.include_tasks: nexus.yml
+  when:
+  - inventory_hostname in groups['nexus']
+
+- name: config haproxy
+  ansible.builtin.include_tasks: ha_config.yml
+  when:
+  - inventory_hostname in groups['haproxy']

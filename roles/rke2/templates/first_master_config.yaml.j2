@@ -1,0 +1,8 @@
+cni: {{ rke2_cni }}
+token: {{ rke2_token }}
+tls-san:
+- cluster.local
+{% for h in groups['all'] %}
+- {{ hostvars[h].ansible_host }}
+{% endfor %}
+container-runtime-endpoint: {{ cri_endpoint }}

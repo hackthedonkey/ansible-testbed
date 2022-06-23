@@ -1,0 +1,10 @@
+---
+- name: Generate gitlab-runner registration token
+  ansible.builtin.include_tasks: token.yml
+  when: inventory_hostname in groups['gitlab']
+
+- name: Install gitlab-runner
+  vars:
+    gitlab_runner_token: "{{ hostvars[groups['gitlab'][0]]['runners_registration_token']['stdout'] }}"
+  ansible.builtin.include_tasks: runner.yml
+  when: inventory_hostname == groups[rke2_servers_group_name].0

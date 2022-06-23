@@ -1,0 +1,61 @@
+- name: add apt-key
+  ansible.builtin.shell: |
+    sh -c 'echo "deb http://apt.postgresql.org/pub/repos/apt/ `lsb_release -cs`-pgdg main" >> /etc/apt/sources.list.d/pgdg.list'
+    wget -q https://www.postgresql.org/media/keys/ACCC4CF8.asc -O - | apt-key add -
+
+- name: Update apt packages
+  become: true
+  apt:
+    update_cache: yes
+
+- name: dpkg unlock
+  file:
+    path: "{{ item }}"
+    state: absent
+  with_items:
+  - /var/lib/dpkg/lock
+  - /var/lib/dpkg/lock-frontend
+  ignore_errors: yes
+
+- name: Install postgresql
+  ansible.builtin.package:
+    name: "postgresql-13"
+    state: present
+  retries: 10
+  delay: 3
+  register: result
+  until: result is not failed
+
+- name: posgresql listen address config
+  lineinfile:
+    path: /etc/postgresql/13/main/postgresql.conf
+    line: listen_addresses = '*'
+    insertbefore: '^listen_addresses'
+
+- name: posgresql listen address config
+  lineinfile:
+    path: /etc/postgresql/13/main/pg_hba.conf
+    line: host    all             all             0.0.0.0/0               md5
+    regexp: '^host    all             all             127.0.0.1/32            md5'
+
+- name: restart postgresql service
+  ansible.builtin.systemd:
+    name: "postgresql@13-main.service"
+    state: restarted
+    enabled: true
+
+- name: "Create db user"
+  postgresql_user:
+    state: present
+    name: "sonar"
+    password: "root"
+  become: yes
+  become_user: postgres
+
+- name: "Create sonar database"
+  postgresql_db:
+    state: present
+    name: "sonar"
+    owner: sonar
+  become: yes
+  become_user: postgres

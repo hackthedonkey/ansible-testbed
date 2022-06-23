@@ -1,0 +1,15 @@
+---
+- name: Install Cert Manager
+  ansible.builtin.include_tasks: cert_manager.yml
+  when:
+  - inventory_hostname == groups[rke2_servers_group_name].0
+
+- name: Install Rancher Server
+  ansible.builtin.include_tasks: rancher.yml
+  when:
+  - inventory_hostname == groups[rke2_servers_group_name].0
+
+- name: config haproxy
+  ansible.builtin.include_tasks: ha_config.yml
+  when:
+  - inventory_hostname in groups['haproxy']

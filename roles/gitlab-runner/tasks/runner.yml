@@ -1,0 +1,27 @@
+---
+- name: Copy runner config
+  ansible.builtin.template:
+    src: templates/gitlab-values.yaml.j2
+    dest: /tmp/gitlab-values.yaml
+    owner: root
+    group: root
+    mode: 0644
+
+- name: Add token
+  lineinfile:
+    path: /tmp/gitlab-values.yaml
+    line: "runnerRegistrationToken: {{ gitlab_runner_token|quote }}"
+    regexp: '^runnerRegistrationToken'
+
+- name: Copy ssl cert
+  ansible.builtin.copy:
+    src: files/certs/cert1.pem
+    dest: /tmp/{{ gitlab_domain }}.crt
+
+- name: Install Gitlab Runner
+  command: "{{ item }}"
+  with_items:
+  - helm repo add gitlab https://charts.gitlab.io
+  - /var/lib/rancher/rke2/bin/kubectl --kubeconfig /etc/rancher/rke2/rke2.yaml create namespace gitlab-managed-apps
+  - /var/lib/rancher/rke2/bin/kubectl --kubeconfig /etc/rancher/rke2/rke2.yaml  create secret generic -n gitlab-managed-apps --from-file /tmp/{{ gitlab_domain }}.crt gitlab-domain-cert
+  - helm install --namespace gitlab-managed-apps gitlab-runner -f /tmp/gitlab-values.yaml gitlab/gitlab-runner

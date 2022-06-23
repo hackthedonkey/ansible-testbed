@@ -1,0 +1,39 @@
+---
+# global
+rke2_servers_group_name: masters
+rke2_cluster_group_name: k8s_cluster
+kubectl: /var/lib/rancher/rke2/bin/kubectl --kubeconfig /etc/rancher/rke2/rke2.yaml
+rke2_data_path: /var/lib/rancher/rke2
+
+# argocd
+argocd_domain: argocd.lazydonkey.co.kr
+
+# gitlab
+gitlab_domain: gitlab.lazydonkey.co.kr
+gitlab_port: 9443
+
+# harbor
+harbor_domain: harbor.lazydonkey.co.kr
+harbor_version: v2.5.1
+docker_compose_version: v2.6.0
+
+# rancher
+rancher_domain: rancher.lazydonkey.co.kr
+rancher_replica: 1
+rancher_version: 2.6.5
+cert_manager_version: v1.8.0
+
+# rke2
+rke2_token: testrke2token
+rke2_cni: canal
+rke2_version: v1.23.6+rke2r2
+k9s_version: v0.25.18
+
+# nexus
+nexus_domain: nexus.lazydonkey.co.kr
+nexus_port: 7443
+
+# sonarqube
+sonarqube_version: 9.5.0
+sonarqube_domain: sonarqube.lazydonkey.co.kr
+sonarqube_port: 9000

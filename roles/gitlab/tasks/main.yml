@@ -1,0 +1,10 @@
+---
+# tasks file for role-rancher
+- name: Install Gitlab-CE
+  ansible.builtin.include_tasks: gitlab-ce.yml
+  when: inventory_hostname in groups['gitlab']
+
+- name: config haproxy
+  ansible.builtin.include_tasks: ha_config.yml
+  when:
+  - inventory_hostname in groups['haproxy']

@@ -1,0 +1,23 @@
+- name: first setup acl config && backend matching config
+  blockinfile:
+    block: |
+      acl rancher hdr_end(host) -i {{ rancher_domain }}
+
+      use_backend rancher if rancher
+    dest: "/etc/haproxy/haproxy.cfg"
+    marker: "# {mark} Haproxy Config"
+    insertafter: EOF
+
+- name: backend config
+  blockinfile:
+    marker: "# {mark} Rancher Backend"
+    block: "{{ lookup('template', 'config.yaml.j2') }}"
+    dest: "/etc/haproxy/haproxy.cfg"
+    insertafter: EOF
+
+
+- name: Restart Haproxy service
+  ansible.builtin.systemd:
+    name: "haproxy.service"
+    state: restarted
+    enabled: true

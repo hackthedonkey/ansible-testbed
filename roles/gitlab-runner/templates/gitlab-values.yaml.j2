@@ -1,0 +1,36 @@
+---
+imagePullPolicy: IfNotPresent
+gitlabUrl: https://{{ gitlab_domain }}
+runnerRegistrationToken: ""
+certsSecretName: gitlab-domain-cert
+terminationGracePeriodSeconds: 3600
+concurrent: 10
+checkInterval: 30
+rbac:
+  create: true
+  clusterWideAccess: true
+
+metrics:
+  enabled: true
+
+hostAliases:
+{% for h in groups['haproxy'] %}
+- ip: {{ hostvars[h].ansible_host }}
+{% endfor %}
+  hostnames:
+    - "{{ gitlab_domain }}"
+    - "{{ harbor_domain }}"
+
+runners:
+  config: |
+    [[runners]]
+      [runners.kubernetes]
+        image = "ubuntu:16.04"
+      [[runners.kubernetes.volumes.host_path]]
+        name = "docker"
+        mount_path = "/var/run/docker.sock"
+        path = "/var/run/docker.sock"
+      [[runners.kubernetes.volumes.host_path]]
+        name = "hostpath-1"
+        mount_path = "/etc/hosts"
+        path = "/etc/hosts"

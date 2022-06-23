@@ -1,0 +1,72 @@
+- name: Install ansible-galaxy psql module
+  local_action: ansible.builtin.command ansible-galaxy collection install community.postgresql
+  retries: 20
+  delay: 3
+  register: result
+  until: result is not failed
+
+- name: execute memory map config command
+  command: "{{ item }}"
+  with_items:
+  - sysctl -w vm.max_map_count=524288
+  - sysctl -w fs.file-max=131072
+#  - ulimit -n 131072
+#  - ulimit -u 8192
+
+- name: config sysctl.conf
+  blockinfile:
+    marker: "# {mark} Memory Map Config"
+    block: |
+      vm.max_map_count=524288
+      fs.file-max=131072
+    dest: "/etc/sysctl.conf"
+    insertafter: EOF
+
+- name: config limits.conf
+  blockinfile:
+    marker: "# {mark} Memory Map Config"
+    block: |
+      root  soft  nproc 131072
+      root  hard  nproc 8192
+    dest: "/etc/security/limits.conf"
+    insertafter: EOF
+
+- name: config profile
+  blockinfile:
+    marker: "# {mark} Memory Map Config"
+    block: |
+      ulimit -n 131072
+      ulimit -u 8192
+    dest: "/etc/profile"
+    insertafter: EOF
+
+- name: reload profile
+  shell: source /etc/profile
+  args:
+     executable: /bin/bash
+
+- name: dpkg unlock
+  file:
+    path: "{{ item }}"
+    state: absent
+  with_items:
+  - /var/lib/dpkg/lock
+  - /var/lib/dpkg/lock-frontend
+  ignore_errors: yes
+
+- name: install docker && pip3
+  ansible.builtin.package:
+    name: "{{ item }}"
+    state: present
+  with_items:
+  - python3-pip
+  - docker.io
+  retries: 10
+  delay: 3
+  register: result
+  until: result is not failed
+
+- name: Install psycopg2-binary
+  shell: |
+    pip3 install --upgrade --ignore-installed pip setuptools
+    python3 -m pip install psycopg2-binary
