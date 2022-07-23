@@ -1,0 +1,13 @@
+- name: hosts config
+  ansible.builtin.lineinfile:
+    path: /etc/hosts
+    line: "{{ hostvars[item].ansible_host }} {{ gitlab_domain }}"
+  with_items: "{{ groups['gitlab'] }}"
+
+- name: Copy cert
+  ansible.builtin.copy:
+    src: files/certs/cert1.pem
+    dest: /etc/ssl/certs/{{ gitlab_domain }}.crt
+
+- name: update ca certificates
+  ansible.builtin.command: update-ca-certificates

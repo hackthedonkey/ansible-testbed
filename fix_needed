@@ -1,0 +1,40 @@
+# 각 호스트 /etc/hosts에 harbor 주소 등록
+# rke2 클러스터 core_dns에 harbor 주소 등록
+
+
+# core dns configmap
+apiVersion: v1
+data:
+  Corefile: |
+    .:53 {
+        errors
+        health
+        ready
+        kubernetes cluster.local in-addr.arpa ip6.arpa {
+          pods insecure
+          fallthrough in-addr.arpa ip6.arpa
+        }
+        prometheus :9153
+        forward . 8.8.8.8 8.8.4.4
+        cache 30
+        loop
+        reload
+        loadbalance
+        hosts custom.hosts lazydonkey.co.kr {
+          192.168.10.72 harbor.lazydonkey.co.kr
+          fallthrough
+        }
+     }
+kind: ConfigMap
+metadata:
+  annotations:
+    meta.helm.sh/release-name: rke2-coredns
+    meta.helm.sh/release-namespace: kube-system
+  labels:
+    app.kubernetes.io/instance: rke2-coredns
+    app.kubernetes.io/name: rke2-coredns
+    k8s-app: kube-dns
+    kubernetes.io/cluster-service: "true"
+    kubernetes.io/name: CoreDNS
+  name: rke2-coredns-rke2-coredns
+  namespace: kube-system

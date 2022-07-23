@@ -21,7 +21,11 @@
     url: https://download.sonatype.com/nexus/3/latest-unix.tar.gz
     dest: /tmp/nexus.tar.gz
     mode: '0644'
-
+  retries: 10
+  delay: 3
+  register: result
+  until: result is not failed
+  
 - name: Add Nexus User
   user:
     name: nexus

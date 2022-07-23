@@ -1,0 +1,17 @@
+- name: dpkg unlock
+  file:
+    path: "{{ item }}"
+    state: absent
+  with_items:
+  - /var/lib/dpkg/lock
+  - /var/lib/dpkg/lock-frontend
+  ignore_errors: yes
+
+- name: Install Docker
+  ansible.builtin.package:
+    name: "docker.io"
+    state: present
+  retries: 10
+  delay: 3
+  register: result
+  until: result is not failed

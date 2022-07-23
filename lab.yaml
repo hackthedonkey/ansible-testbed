@@ -5,12 +5,12 @@
     - name: include env vars
       include_vars: vars/main.yml
   roles:
-  - ./roles/haproxy
-  - ./roles/rke2
-  - ./roles/rancher
-  - ./roles/argocd
-  - ./roles/harbor
-  - ./roles/gitlab
-  - ./roles/gitlab-runner
-  - ./roles/nexus
-  - ./roles/sonarqube
+  - haproxy
+  - rke2
+  - rancher
+  - argocd
+  - harbor
+  - gitlab
+  - gitlab-runner
+  - nexus
+  - sonarqube

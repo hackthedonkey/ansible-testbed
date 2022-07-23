@@ -6,4 +6,3 @@ tls-san:
 {% for h in groups['all'] %}
 - {{ hostvars[h].ansible_host }}
 {% endfor %}
-container-runtime-endpoint: {{ cri_endpoint }}

@@ -6,3 +6,4 @@ rke2_data_path: /var/lib/rancher/rke2
 argocd_domain: argocd.lazydonkey.co.kr
 argocd_tls_secret_name: tls-argocd-secret
 argocd_ingress_config: templates/ingress.yaml.j2
+argocd_tls_cm: templates/argocd-tls-certs-cm.yaml.j2

@@ -33,7 +33,7 @@
     name: gitlab-ce
     state: present
 
-- name: Create Harbor Cert Directory
+- name: Create Gitlab Cert Directory
   ansible.builtin.file:
     path: "{{ gitlab_ssl_path }}"
     state: directory
@@ -42,13 +42,15 @@
     owner: root
     group: root
 
-- name: Copy ssl cert
+- name: Copy fullchain
   ansible.builtin.copy:
-    src: "{{ item }}"
-    dest: "{{ gitlab_ssl_path }}"
-  with_items:
-  - files/certs/fullchain1.pem
-  - files/certs/privkey1.pem
+    src: files/certs/fullchain1.pem
+    dest: /etc/gitlab/ssl/{{ gitlab_domain }}.crt
+
+- name: Copy privkey
+  ansible.builtin.copy:
+    src: files/certs/privkey1.pem
+    dest: /etc/gitlab/ssl/{{ gitlab_domain }}.key
 
 - name: config gitlab.rb
   ansible.builtin.template:

@@ -13,6 +13,18 @@
   ansible.builtin.shell: |
    {{ kubectl }} create secret tls {{ argocd_tls_secret_name }} --cert /tmp/certs/cert1.pem --key /tmp/certs/privkey1.pem -n argocd
 
+- name: Copy argocd tls cm
+  ansible.builtin.template:
+    src: "{{ argocd_tls_cm }}"
+    dest: /tmp/argocd-tls-cm.yaml
+    owner: root
+    group: root
+    mode: 0666
+
+- name: Create argocd-tls-cm
+  ansible.builtin.shell: |
+    {{ kubectl }} apply -f /tmp/argocd-tls-cm.yaml -n argocd
+
 - name: Copy argocd ingress
   ansible.builtin.template:
     src: "{{ argocd_ingress_config }}"

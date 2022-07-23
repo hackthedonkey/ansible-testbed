@@ -15,7 +15,7 @@
 
 - name: Copy ssl cert
   ansible.builtin.copy:
-    src: files/certs/cert1.pem
+    src: files/certs/fullchain1.pem
     dest: /tmp/{{ gitlab_domain }}.crt
 
 - name: Install Gitlab Runner

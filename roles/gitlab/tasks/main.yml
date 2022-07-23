@@ -8,3 +8,6 @@
   ansible.builtin.include_tasks: ha_config.yml
   when:
   - inventory_hostname in groups['haproxy']
+
+- name: global config
+  ansible.builtin.include_tasks: global.yml

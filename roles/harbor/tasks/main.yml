@@ -1,4 +1,10 @@
 ---
+- name: Install Docker
+  ansible.builtin.include_tasks: docker.yml
+
+- name: hosts config
+  ansible.builtin.include_tasks: hosts.yml
+
 - name: Install Harbor
   ansible.builtin.include_tasks: harbor.yml
   when:

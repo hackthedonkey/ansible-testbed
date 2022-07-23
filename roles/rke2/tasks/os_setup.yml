@@ -30,7 +30,6 @@
     state: present
   with_items:
   - jq
-  - docker.io
   retries: 10
   delay: 3
   register: result
